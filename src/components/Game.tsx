@@ -12,6 +12,8 @@ import {checkGameOver} from '../utils/checkGameOver';
 import {Food} from './Food';
 import {checkEatsFood} from '../utils/checkEatsFood';
 import {randomFoodPosition} from '../utils/randomFoodPosition';
+import {Header} from './Header';
+import {Text} from 'react-native-elements';
 
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
@@ -91,19 +93,36 @@ export function Game(): JSX.Element {
 
     // CHECK IF EATS FOODS
     if (checkEatsFood(newHead, food, 2)) {
-      //incremnet snake
-      setSnake([newHead, ...snake]);
       // set random fruit position
       setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
+      //incremnet snake
+      setSnake([newHead, ...snake]);
       // get another position of food
       setScore(score + SCORE_INCREMENT);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
   }
+  function reloadGame() {
+    setSnake(SNAKE_INITIAL_POSITION);
+    setFood(FOOD_INITIAL_POSITION);
+    setIsGameOver(false);
+    setScore(0);
+    setDirection(Direction.Right);
+    setIsPaused(false);
+  }
+  function pauseGame() {
+    setIsPaused(!isPaused);
+  }
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
       <SafeAreaView style={styles.container}>
+        <Header
+          reloadGame={reloadGame}
+          pauseGame={pauseGame}
+          isPaused={isPaused}>
+          <Text style={{fontSize: 22, fontWeight: 'bold'}}>{score}</Text>
+        </Header>
         <View style={styles.boundaries}>
           <Snake snake={snake} />
           <Food x={food.x} y={food.y} />

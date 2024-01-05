@@ -9,6 +9,7 @@ function getRandomFruitEmoji() {
 }
 
 export function Food({x, y}: Coordinate): JSX.Element {
+    
   return (
     <Text style={[{top: y * 10, left: x * 10}, styles.food]}>
       {getRandomFruitEmoji()}
