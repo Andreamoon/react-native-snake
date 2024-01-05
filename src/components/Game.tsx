@@ -1,16 +1,21 @@
 import * as React from 'react';
 import {Colors} from '../styles/colorts';
-import {SafeAreaView, StyleSheet} from 'react-native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
 import {
   GestureEvent,
   PanGestureHandler,
   PanGestureHandlerEventPayload,
 } from 'react-native-gesture-handler';
 import {Coordinate, Direction, GestureEventType} from '../types';
+import {Snake} from './Snake';
+import {checkGameOver} from '../utils/checkGameOver';
+import {Food} from './Food';
+import {checkEatsFood} from '../utils/checkEatsFood';
+import {randomFoodPosition} from '../utils/randomFoodPosition';
 
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
-const GAME_BOUNDS = {xMin: 0, xMax: 35, yMin: 0, yMax: 63};
+const GAME_BOUNDS = {xMin: 0, xMax: 35, yMin: 0, yMax: 71};
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 10;
 
@@ -22,6 +27,7 @@ export function Game(): JSX.Element {
   const [food, setFood] = React.useState<Coordinate>(FOOD_INITIAL_POSITION);
   const [isGameOver, setIsGameOver] = React.useState<boolean>(false);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
+  const [score, setScore] = React.useState<number>(0);
 
   function handleGesture(event: GestureEventType) {
     const {translationX, translationY} = event.nativeEvent;
@@ -47,15 +53,76 @@ export function Game(): JSX.Element {
       }
     }
   }
+
+  React.useEffect(() => {
+    if (!isGameOver) {
+      const intervalId = setInterval(() => {
+        !isPaused && moveSnake();
+      }, MOVE_INTERVAL);
+      return () => clearInterval(intervalId);
+    }
+  }, [snake, isGameOver, isPaused]);
+  function moveSnake() {
+    const snakeHead = snake[0];
+    const newHead = {...snakeHead}; // crea una copia
+
+    // CHECK GAME OVER
+    if (checkGameOver(snakeHead, GAME_BOUNDS)) {
+      setIsGameOver(prev => !prev);
+      return;
+    }
+    switch (direction) {
+      case Direction.Up:
+        newHead.y -= 1;
+        break;
+      case Direction.Down:
+        newHead.y += 1;
+        break;
+      case Direction.Left:
+        newHead.x -= 1;
+        break;
+      case Direction.Right:
+        newHead.x += 1;
+        break;
+
+      default:
+        break;
+    }
+
+    // CHECK IF EATS FOODS
+    if (checkEatsFood(newHead, food, 2)) {
+      //incremnet snake
+      setSnake([newHead, ...snake]);
+      // set random fruit position
+      setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
+      // get another position of food
+      setScore(score + SCORE_INCREMENT);
+    } else {
+      setSnake([newHead, ...snake.slice(0, -1)]);
+    }
+  }
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
-      <SafeAreaView style={styles.conntainer}></SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.boundaries}>
+          <Snake snake={snake} />
+          <Food x={food.x} y={food.y} />
+        </View>
+      </SafeAreaView>
     </PanGestureHandler>
   );
 }
 const styles = StyleSheet.create({
-  conntainer: {
+  container: {
     flex: 1,
     backgroundColor: Colors.primary,
+  },
+  boundaries: {
+    flex: 1,
+    borderBlockColor: Colors.primary,
+    borderWidth: 12,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    backgroundColor: Colors.background,
   },
 });
