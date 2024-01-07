@@ -8,11 +8,22 @@ function getRandomFruitEmoji() {
   return fruitsEmoji[randomIndex];
 }
 
-export function Food({x, y}: Coordinate): JSX.Element {
-    
+interface FoodProps extends Coordinate {
+  isEatingFood: boolean;
+}
+export function Food<T extends FoodProps>({
+  x,
+  y,
+  isEatingFood,
+}: T): JSX.Element {
+  const [randomFruit,setRandomFruit] = React.useState<string>("")
+  React.useEffect(() => {
+    setRandomFruit(getRandomFruitEmoji())
+  }, [isEatingFood]);
+
   return (
     <Text style={[{top: y * 10, left: x * 10}, styles.food]}>
-      {getRandomFruitEmoji()}
+      {randomFruit}
     </Text>
   );
 }

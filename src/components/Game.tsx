@@ -14,10 +14,11 @@ import {checkEatsFood} from '../utils/checkEatsFood';
 import {randomFoodPosition} from '../utils/randomFoodPosition';
 import {Header} from './Header';
 import {Text} from 'react-native-elements';
+import Constants from '../utils/Constants';
 
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
-const GAME_BOUNDS = {xMin: 0, xMax: 35, yMin: 0, yMax: 71};
+const GAME_BOUNDS = {xMin: 0, xMax: 37, yMin: 0, yMax: 72};
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 10;
 
@@ -30,7 +31,7 @@ export function Game(): JSX.Element {
   const [isGameOver, setIsGameOver] = React.useState<boolean>(false);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
   const [score, setScore] = React.useState<number>(0);
-
+  const [isEatingFood, setIsEatingFood] = React.useState<boolean>(false);
   function handleGesture(event: GestureEventType) {
     const {translationX, translationY} = event.nativeEvent;
     // console.log(translationX, translationY);
@@ -93,6 +94,8 @@ export function Game(): JSX.Element {
 
     // CHECK IF EATS FOODS
     if (checkEatsFood(newHead, food, 2)) {
+      //SET IS EATING FOOD TRUE
+      setIsEatingFood(true);
       // set random fruit position
       setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
       //incremnet snake
@@ -100,6 +103,8 @@ export function Game(): JSX.Element {
       // get another position of food
       setScore(score + SCORE_INCREMENT);
     } else {
+      // SET IS EATING FOOD FALSE
+      setIsEatingFood(false);
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
   }
@@ -125,7 +130,7 @@ export function Game(): JSX.Element {
         </Header>
         <View style={styles.boundaries}>
           <Snake snake={snake} />
-          <Food x={food.x} y={food.y} />
+          <Food x={food.x} y={food.y} isEatingFood={isEatingFood} />
         </View>
       </SafeAreaView>
     </PanGestureHandler>
