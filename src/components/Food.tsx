@@ -10,20 +10,22 @@ function getRandomFruitEmoji() {
 
 interface FoodProps extends Coordinate {
   isEatingFood: boolean;
+  fruitType: string;
+  setFruitType: (arg: string) => void;
 }
 export function Food<T extends FoodProps>({
   x,
   y,
-  isEatingFood,
+  isEatingFood,setFruitType,fruitType
 }: T): JSX.Element {
-  const [randomFruit,setRandomFruit] = React.useState<string>("")
   React.useEffect(() => {
-    setRandomFruit(getRandomFruitEmoji())
+     setFruitType(getRandomFruitEmoji());
   }, [isEatingFood]);
+
 
   return (
     <Text style={[{top: y * 10, left: x * 10}, styles.food]}>
-      {randomFruit}
+      {fruitType}
     </Text>
   );
 }
